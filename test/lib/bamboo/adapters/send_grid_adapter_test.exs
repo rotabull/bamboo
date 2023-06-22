@@ -428,6 +428,24 @@ defmodule Bamboo.SendGridAdapterTest do
     assert params["reply_to"] == %{"email" => "foo@bar.com", "name" => "Foo Bar"}
   end
 
+  test "deliver/2 correctly formats reply-to-list from headers as string" do
+    email = new_email(headers: %{"reply-to-list" => "foo@bar.com"})
+
+    email |> SendGridAdapter.deliver(@config)
+
+    assert_receive {:fake_sendgrid, %{params: params}}
+    assert params["reply_to_list"] == [%{"email" => "foo@bar.com"}]
+  end
+
+  test "deliver/2 correctly formats reply-to-list from headers as list" do
+    email = new_email(headers: %{"reply-to-list" => ["foo@bar.com", "baz@qux.com"]})
+
+    email |> SendGridAdapter.deliver(@config)
+
+    assert_receive {:fake_sendgrid, %{params: params}}
+    assert params["reply_to_list"] == [%{"email" => "foo@bar.com"}, %{"email" => "baz@qux.com"}]
+  end
+
   test "deliver/2 correctly sends headers" do
     email =
       new_email(

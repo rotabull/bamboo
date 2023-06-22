@@ -118,6 +118,7 @@ defmodule Bamboo.SendGridAdapter do
     |> put_from(email)
     |> put_personalizations(email)
     |> put_reply_to(email)
+    |> put_reply_to_list(email)
     |> put_headers(email)
     |> put_subject(email)
     |> put_content(email)
@@ -221,11 +222,31 @@ defmodule Bamboo.SendGridAdapter do
 
   defp put_reply_to(body, _), do: body
 
+  defp put_reply_to_list(body, %Email{headers: %{"reply-to-list" => emails}}) when is_list(emails) do
+    Map.put(body, :reply_to_list, Enum.map(emails, &(%{email: &1})))
+  end
+
+  defp put_reply_to_list(body, %Email{headers: %{"reply-to-list" => emails}}) do
+    Map.put(body, :reply_to_list, emails |> String.split(",") |> Enum.map(&(%{email: &1})))
+  end
+
+  defp put_reply_to_list(body, %Email{headers: %{"Reply-To-List" => emails}}) when is_list(emails) do
+    Map.put(body, :reply_to_list, Enum.map(emails, &(%{email: &1})))
+  end
+
+  defp put_reply_to_list(body, %Email{headers: %{"Reply-To-List" => emails}}) do
+    Map.put(body, :reply_to_list, emails |> String.split(",") |> Enum.map(&(%{email: &1})))
+  end
+
+  defp put_reply_to_list(body, _), do: body
+
   defp put_headers(body, %Email{headers: headers}) when is_map(headers) do
     headers_without_tuple_values =
       headers
       |> Map.delete("reply-to")
       |> Map.delete("Reply-To")
+      |> Map.delete("reply-to-list")
+      |> Map.delete("Reply-To-List")
 
     Map.put(body, :headers, headers_without_tuple_values)
   end
