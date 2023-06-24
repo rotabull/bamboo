@@ -223,19 +223,27 @@ defmodule Bamboo.SendGridAdapter do
   defp put_reply_to(body, _), do: body
 
   defp put_reply_to_list(body, %Email{headers: %{"reply-to-list" => emails}}) when is_list(emails) do
-    Map.put(body, :reply_to_list, Enum.map(emails, &(%{email: &1})))
+    body
+    |> Map.delete(:reply_to)
+    |> Map.put(:reply_to_list, Enum.map(emails, &(%{email: &1})))
   end
 
   defp put_reply_to_list(body, %Email{headers: %{"reply-to-list" => emails}}) do
-    Map.put(body, :reply_to_list, emails |> String.split(",") |> Enum.map(&(%{email: &1})))
+    body
+    |> Map.delete(:reply_to)
+    |> Map.put(:reply_to_list, emails |> String.split(",") |> Enum.map(&(%{email: &1})))
   end
 
   defp put_reply_to_list(body, %Email{headers: %{"Reply-To-List" => emails}}) when is_list(emails) do
-    Map.put(body, :reply_to_list, Enum.map(emails, &(%{email: &1})))
+    body
+    |> Map.delete(:reply_to)
+    |> Map.put(:reply_to_list, Enum.map(emails, &(%{email: &1})))
   end
 
   defp put_reply_to_list(body, %Email{headers: %{"Reply-To-List" => emails}}) do
-    Map.put(body, :reply_to_list, emails |> String.split(",") |> Enum.map(&(%{email: &1})))
+    body
+    |> Map.delete(:reply_to)
+    |> Map.put(:reply_to_list, emails |> String.split(",") |> Enum.map(&(%{email: &1})))
   end
 
   defp put_reply_to_list(body, _), do: body
